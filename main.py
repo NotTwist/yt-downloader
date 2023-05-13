@@ -4,6 +4,20 @@ import os
 import ffmpeg  # download audio only
 import unicodedata
 import re
+import argparse
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='YouTube Video Downloader')
+    parser.add_argument('video_link', help='Link to the YouTube video')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-v', action='store_true', help='Download video only')
+    group.add_argument('-a', action='store_true', help='Download audio only')
+    group.add_argument('-m', action='store_true', help='Download both video and audio')
+    parser.add_argument('file_path', nargs='?', default='', help='File path to save the downloaded file')
+
+    return parser.parse_args()
+
 
 VIDEO_OUTPUT = "C:\видео\скачанные видео аудио"
 MUSIC_OUTPUT = "C:\видео\музыка"
@@ -58,30 +72,41 @@ def download_video(yt, title, output_path):
 
 
 if __name__ == '__main__':
-    link = sys.argv[1]
-    output_parameter = None
-    if len(sys.argv)>2:
-        output_parameter = sys.argv[2]
+    args = parse_arguments()
+    link = args.video_link
+    download_option = ''
+    if args.v:
+        download_option = '-v'
+    elif args.a:
+        download_option = '-a'
+    elif args.m:
+        download_option = '-m'
+    output_path = args.file_path
     yt = pytube.YouTube(link)
     print("Start downloading...")
+    #print(args, yt.title)
     title = slugify(yt.title, True)
-    match output_parameter:
+    match download_option:
         case "-v":
-            output_path = VIDEO_OUTPUT
+            if output_path=='':
+                output_path = VIDEO_OUTPUT
             print("Downloading video to " + output_path)
             path, stream = download_video(yt, title, output_path)
         case "-m":
-            output_path = MUSIC_OUTPUT
+            if output_path=='':
+                output_path = MUSIC_OUTPUT
             print("Downloading music to " + output_path)
             stream = yt.streams.filter(progressive=False, type="audio").order_by('abr').desc().first()
             path = stream.download(output_path=output_path, filename=title+".mp3")
         case "-a":
-            output_path = AUDIO_OUTPUT
+            if output_path == '':
+                output_path = AUDIO_OUTPUT
             print("Downloading audio to " + output_path)
             stream = yt.streams.filter(progressive=False, type="audio").order_by('abr').desc().first()
             path = stream.download(output_path=output_path, filename=title+".mp3")
         case _:
-            output_path = VIDEO_OUTPUT
+            if output_path == '':
+                output_path = VIDEO_OUTPUT
             print("Downloading video to " + output_path)
             path, stream = download_video(yt, title, output_path)
     print("Download finished")
