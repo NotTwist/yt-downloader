@@ -18,10 +18,10 @@ def parse_arguments():
 
     return parser.parse_args()
 
-
-VIDEO_OUTPUT = "C:\видео\скачанные видео аудио"
-MUSIC_OUTPUT = "C:\видео\музыка"
-AUDIO_OUTPUT = "C:\видео\Звуковые эффекты"
+#manually change paths to downloads
+VIDEO_OUTPUT = ""
+MUSIC_OUTPUT = ""
+AUDIO_OUTPUT = ""
 
 
 def slugify(value, allow_unicode=False):
